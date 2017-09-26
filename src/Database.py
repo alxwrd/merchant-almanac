@@ -2,11 +2,11 @@ import sqlite3
 
 
 class Database(object):
+    class DbFile(object):
+        name = "merchants-almanac.db"
 
     def __init__(self, **kwargs):
-        self.database = "merchants-almanac.db"
- 
-        self.conn = sqlite3.connect(self.database)
+        self.conn = sqlite3.connect(self.DbFile.name)
 
         self.database_schema = [
             {
