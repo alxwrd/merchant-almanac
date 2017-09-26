@@ -7,19 +7,18 @@ class Database(object):
 
     def __init__(self, **kwargs):
         self.conn = sqlite3.connect(self.DbFile.name)
+        self.conn.row_factory = sqlite3.Row
 
         self.database_schema = [
             {
                 "name": "oceans",
                 "columns": {
-                    "id": "interger primary key",
                     "name": "text"
                 }
             },
             {
                 "name": "islands",
                 "columns": {
-                    "id": "interger primary key",
                     "ocean_id": "interger",
                     "name": "text"
                 }
@@ -27,7 +26,6 @@ class Database(object):
             {
                 "name": "commodities",
                 "columns": {
-                    "id": "interger primary key",
                     "island_id": "interger",
                     "name": "text"
                 }
@@ -35,8 +33,7 @@ class Database(object):
             {
                 "name": "orders",
                 "columns": {
-                    "id": "interger primary key",
-                    "commoditiy_id": "interger",
+                    "commodity_id": "interger",
                     "shop": "text",
                     "price": "interger",
                     "amount": "interger",
