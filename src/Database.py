@@ -10,14 +10,14 @@ class Database(object):
 
         self.database_schema = [
             {
-                "table": "oceans",
+                "name": "oceans",
                 "columns": {
                     "id": "interger primary key",
                     "name": "text"
                 }
             },
             {
-                "table": "islands",
+                "name": "islands",
                 "columns": {
                     "id": "interger primary key",
                     "ocean_id": "interger",
@@ -25,7 +25,7 @@ class Database(object):
                 }
             },
             {
-                "table": "commodities",
+                "name": "commodities",
                 "columns": {
                     "id": "interger primary key",
                     "island_id": "interger",
@@ -33,14 +33,16 @@ class Database(object):
                 }
             },
             {
-                "table": "orders",
+                "name": "orders",
                 "columns": {
                     "id": "interger primary key",
                     "commoditiy_id": "interger",
                     "shop": "text",
                     "price": "interger",
                     "amount": "interger",
-                    "order_type": "text"
+                    "order_type": "text",
+                    "time_reported": "text"
+
                 }
             },
         ]
@@ -49,19 +51,48 @@ class Database(object):
 
 
     def validate_database(self):
-        pass
+        """Checks the defined database schema against the current
 
+        Given the data in `database_schema`: try to figure out how the current
+        database looks, and if it doesn't look how the schema says, update the
+        it until it does.
 
-    def create_database(self):
+        This has the bonus that is the database is empty, it will create it from
+        scratch
+        """
         for table in self.database_schema:
-            self.conn.execute(
-                "CREATE TABLE {} ({})".format(
-                    table["table"],
-                    ", ".join(["{} {}".format(key, value)
-                              for key, value in table["columns"].items()])
-                )
-            )
+            try:
+                #Check to see if the table exists
+                self.conn.execute("SELECT * FROM {}".format(table["name"]))
+            except sqlite3.OperationalError:
+                #If it doesn't, add it
+                self.add_table(table)
+                continue
+
+            #Get the column information for the current table
+            current_columns = [
+                (col[1], col[2]) #Name, type
+                for col in self.conn.execute(
+                    "PRAGMA table_info({})".format(table["name"]))]
+
+            for column in table["columns"]: #For the columns in the schema
+                if not column in [col[0] for col in current_columns]:
+                    #If it doesn't exist in the database: add it
+                    self.add_column(table["name"],
+                                    column,
+                                    table["columns"][column])
         self.conn.commit()
 
-    def add_new_data(self, data):
-        pass
+
+    def add_table(self, table):
+        self.conn.execute(
+            "CREATE TABLE {} ({})".format(
+                table["name"],
+                ", ".join(["{} {}".format(key, value)
+                           for key, value in table["columns"].items()])
+            )
+        )
+
+
+    def add_column(self, table, column, type_):
+        self.conn.execute("ALTER TABLE {} ADD {} {}".format(table, column, type_))
