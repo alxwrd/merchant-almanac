@@ -1,0 +1,15 @@
+% rebase("site/base.html", title="Merchant's Almanac")
+
+% include("site/header.html")
+
+<div class="commodity-selector">
+    % for commodity in island.commodities:
+        <div class="commodity-box {{commodity}}">
+        <a href="/almanac/{{island.parent.name}}/{{island.name}}/{{commodity}}" class="fill-div">
+        {{ commodity }}
+        </a>
+        </div>
+    % end
+</div>
+
+% include("site/footer.html")

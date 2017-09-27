@@ -1,0 +1,15 @@
+% rebase("site/base.html", title="Merchant's Almanac")
+
+% include("site/header.html")
+
+<div class="island-selector">
+    % for island in ocean.islands:
+        <div class="island-box {{island}}">
+        <a href="/almanac/{{ocean.name}}/{{island}}" class="fill-div">
+        {{ island }}
+        </a>
+        </div>
+    % end
+</div>
+
+% include("site/footer.html")
