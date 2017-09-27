@@ -11,7 +11,12 @@ class WebServer(bottle.Bottle):
         super().__init__()
         self.almanac = Almanac()
 
+        self.route("/", method="GET", callback=self.index)
         self.route("/upload", method="POST", callback=self.upload)
+
+
+    def index(self):
+        return bottle.template("site\\index.html")
 
 
     def upload(self):
