@@ -4,6 +4,8 @@ import bottle
 from Almanac import Almanac
 
 
+bottle.BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 #100MB
+
 
 class WebServer(bottle.Bottle):
 
@@ -28,9 +30,7 @@ class WebServer(bottle.Bottle):
 
 
     def upload(self):
-        marketdata = bottle.request.files.get("Commodities.json")
-
-        self.almanac.update(json.loads(marketdata.file.read().decode("utf-8")))
+        self.almanac.update(bottle.request.json)
         return ""
 
 
