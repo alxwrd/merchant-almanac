@@ -131,6 +131,11 @@ class Island(Database):
                 "SELECT rowid, * FROM commodities WHERE island_id=?", (self.id_,))
         }
 
+    @property
+    def parent(self):
+        cur = self.conn.execute("SELECT rowid, * from oceans WHERE rowid=?", (self.ocean_id,))
+        return Ocean.from_db(cur.fetchone())
+
 
 class Commodity(Database):
 
@@ -160,6 +165,11 @@ class Commodity(Database):
                 "SELECT * FROM orders WHERE commodity_id=? AND order_type='sell'",
                 (self.id_,))]
 
+    @property
+    def parent(self):
+        cur = self.conn.execute("SELECT rowid, * from islands WHERE rowid=?", (self.island_id,))
+        return Island.from_db(cur.fetchone())
+
 
 class Order(Database):
 
@@ -177,3 +187,8 @@ class Order(Database):
         return cls(db_row["shop"], db_row["price"], db_row["amount"],
                    db_row["order_type"], db_row["time_reported"],
                    db_row["commodity_id"])
+
+    @property
+    def parent(self):
+        cur = self.conn.execute("SELECT rowid, * from commodities WHERE rowid=?", (self.commodity_id,))
+        return Commodity.from_db(cur.fetchone())
