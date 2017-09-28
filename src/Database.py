@@ -38,7 +38,7 @@ class Database(object):
                     "price": "interger",
                     "amount": "interger",
                     "order_type": "text",
-                    "time_reported": "text"
+                    "time_reported": "timestamp"
 
                 }
             },
