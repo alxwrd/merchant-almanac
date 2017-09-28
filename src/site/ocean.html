@@ -2,13 +2,14 @@
 
 % include("site/header.html")
 
-<div class="island-selector">
-    % for island in ocean.islands:
+<div class="selector">
+    % for island in sorted(ocean.islands.keys()):
     <div class="logo island">
-        <div class="logo-text">
+        <div class="logo-text shadow">
             {{ island }}
             <a href="/almanac/{{ocean.name}}/{{island}}"><span class="link-fill"></span></a>
         </div>
+    </div>
     % end
 </div>
 

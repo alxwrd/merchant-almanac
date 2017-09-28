@@ -2,14 +2,14 @@
 
 % include("site/header.html")
 
-<div class="commodity-selector">
-    % for commodity in island.commodities:
-    <div class="logo commodity">
-        <div class="logo-text">
+<div class="selector">
+    % for commodity in sorted(island.commodities.keys()):
+    <div class="logo commodity small">
+        <div class="logo-text shadow">
             {{ commodity }}
             <a href="/almanac/{{island.parent.name}}/{{island.name}}/{{commodity}}"><span class="link-fill"></span></a>
         </div>
-      </div>
+    </div>
     % end
 </div>
 

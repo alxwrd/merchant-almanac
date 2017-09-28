@@ -1,22 +1,60 @@
 @import url('https://fonts.googleapis.com/css?family=Lobster');
+@import url('https://fonts.googleapis.com/css?family=Josefin+Slab');
+
+body {
+    margin-top: 10%;
+    font-family: 'Josefin Slab', serif;
+    background-color: #EEE;
+    color: #1E1B1B;
+}
+
+.header {
+    padding: 10px;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    position: fixed;
+    background-color: #B3C0E5;
+    z-index: 1;
+    box-shadow: 0 0 20px 6px #1E1B1B;
+}
+
+
+.sub-title {
+    margin-top: -20px;
+    margin-left: 30px;
+    font-size: 1.5em;
+}
+
+
+.title {
+    font-family: 'Lobster', cursive;
+    font-size: 4em;
+}
+
+.selector {
+    width: 100%;
+    text-align: center;
+}
+
 
 .logo.ocean {
-    background-image: url("https://github.com/alxwrd/merchant-almanac/raw/master/src/site/img/ocean_logo.png");
+    background-image: url("/img/ocean_logo.png");
 }
 
 .logo.island {
-    background-image: url("https://github.com/alxwrd/merchant-almanac/raw/master/src/site/img/island_logo.png");
+    background-image: url("/img/island_logo.png");
 }
 
 .logo.commodity {
-    background-image: url("https://github.com/alxwrd/merchant-almanac/raw/master/src/site/img/commodity_logo.png");
+    background-image: url("/img/commodity_logo.png");
 }
 
 .logo-text {
     font-family: 'Lobster', cursive;
     color: #EEE;
-    font-size: 3em;
-    line-height: 0.7em;
+    font-size: inherit;
+    line-height: 0.9em;
     height: inherit;
     width: inherit;
     display: table-cell;
@@ -31,20 +69,36 @@
     top:0;
     left: 0;
     z-index: 1;
-
-    /* fixes overlap error in IE7/8,
-        make sure you have an empty gif */
-    background-image: url('empty.gif');
 }
 
 
+.logo.small {
+    font-size: 1.8em;
+    height: 88;
+    width: 120px;
+    padding: 6px;
+}
+
 .logo {
+    font-size: 2.4em;
+    position: relative;
     background-repeat: no-repeat;
     background-position: center;
+    background-size: contain;
     display: inline-block;
+    height: 118px;
+    width: 160px;
+    padding: 8px;
+}
+
+.logo.large {
+    font-size: 3em;
     height: 148px;
     width: 200px;
     padding: 10px;
+}
+
+.shadow {
     text-shadow: 1px 1px 0 #000,
         -1px 1px 0 #000,
         1px -1px 0 #000,
@@ -71,7 +125,7 @@
         -2px -1px 0 #000;
 }
 
-.logo-text:hover {
+.shadow:hover {
     text-shadow: 1px 1px 0 #17526d,
         -1px 1px 0 #17526d,
         1px -1px 0 #17526d,
@@ -96,5 +150,4 @@
         -2px 1px 0 #17526d,
         2px -1px 0 #17526d,
         -2px -1px 0 #17526d;
-    cursor: pointer;
 }
