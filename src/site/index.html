@@ -4,11 +4,12 @@
 
 <div class="ocean-selector">
     % for ocean in almanac.oceans:
-        <div class="ocean-box {{ocean}}">
-        <a href="/almanac/{{ocean}}" class="fill-div">
-        {{ ocean }}
-        </a>
+    <div class="logo ocean">
+        <div class="logo-text">
+            {{ ocean }}
+            <a href="/almanac/{{ocean}}"><span class="link-fill"></span></a>
         </div>
+      </div>
     % end
 </div>
 

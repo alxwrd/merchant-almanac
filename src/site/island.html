@@ -4,11 +4,12 @@
 
 <div class="commodity-selector">
     % for commodity in island.commodities:
-        <div class="commodity-box {{commodity}}">
-        <a href="/almanac/{{island.parent.name}}/{{island.name}}/{{commodity}}" class="fill-div">
-        {{ commodity }}
-        </a>
+    <div class="logo commodity">
+        <div class="logo-text">
+            {{ commodity }}
+            <a href="/almanac/{{island.parent.name}}/{{island.name}}/{{commodity}}"><span class="link-fill"></span></a>
         </div>
+      </div>
     % end
 </div>
 

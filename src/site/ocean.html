@@ -4,10 +4,10 @@
 
 <div class="island-selector">
     % for island in ocean.islands:
-        <div class="island-box {{island}}">
-        <a href="/almanac/{{ocean.name}}/{{island}}" class="fill-div">
-        {{ island }}
-        </a>
+    <div class="logo island">
+        <div class="logo-text">
+            {{ island }}
+            <a href="/almanac/{{ocean.name}}/{{island}}"><span class="link-fill"></span></a>
         </div>
     % end
 </div>
