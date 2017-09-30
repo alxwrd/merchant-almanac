@@ -17,8 +17,9 @@ class WebServer(bottle.Bottle):
 
         self.route("/", method="GET", callback=self.index)
         self.route("/almanac/<ocean>", method="GET", callback=self.oceans)
-        self.route("/almanac/<ocean>/<island>", method="GET", callback=self.islands)
-        self.route("/almanac/<ocean>/<island>/<commodity>", method="GET", callback=self.commodities)
+        self.route("/almanac/<ocean>/commodity/<commodity>", method="GET", callback=self.ocean_commodities)
+        self.route("/almanac/<ocean>/island/<island>", method="GET", callback=self.islands)
+        self.route("/almanac/<ocean>/island/<island>/commodity/<commodity>", method="GET", callback=self.island_commodities)
 
         #Static files
         self.route("/css/<name>", method='GET',
@@ -50,7 +51,13 @@ class WebServer(bottle.Bottle):
             island=self.almanac.oceans[ocean].islands[island])
 
 
-    def commodities(self, ocean, island, commodity):
+    def ocean_commodities(self, ocean, commodity):
+        return bottle.template(
+            "site/commodity.html",
+            commodity=self.almanac.oceans[ocean].commodities[commodity])
+
+
+    def island_commodities(self, ocean, island, commodity):
         return bottle.template(
             "site/commodity.html",
             commodity=self.almanac.oceans[ocean].islands[island].commodities[commodity])

@@ -2,12 +2,20 @@
 
 % include("site/header.html")
 
+<div class="title">
+    {{ island.name }}
+</div>
+
+
+<div class="sub-title">
+    Commodities
+</div>
 <div class="selector">
     % for commodity in sorted(island.commodities.keys()):
     <div class="logo commodity small">
         <div class="logo-text shadow">
             {{ commodity }}
-            <a href="/almanac/{{island.parent.name}}/{{island.name}}/{{commodity}}"><span class="link-fill"></span></a>
+            <a href="/almanac/{{island.parent.name}}/island/{{island.name}}/commodity/{{commodity}}"><span class="link-fill"></span></a>
         </div>
     </div>
     % end

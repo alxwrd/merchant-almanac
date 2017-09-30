@@ -26,7 +26,6 @@ class Database(object):
             {
                 "name": "commodities",
                 "columns": {
-                    "island_id": "interger",
                     "name": "text"
                 }
             },
@@ -34,6 +33,7 @@ class Database(object):
                 "name": "orders",
                 "columns": {
                     "commodity_id": "interger",
+                    "island_id": "interger",
                     "shop": "text",
                     "price": "interger",
                     "amount": "interger",

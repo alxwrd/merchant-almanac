@@ -2,6 +2,27 @@
 
 % include("site/header.html")
 
-Page for {{ commodity.name }}
+<div class="title">
+    {{ commodity.parent.name}}: {{ commodity.name }}
+</div>
+
+<div class="sub-title">
+    Buy Orders
+</div>
+<div class="selector">
+    % for order in sorted(commodity.parent.buy_orders(commodity.id_), key=lambda o: o.price, reverse=True):
+        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported }}<br>
+    % end
+</div>
+
+
+<div class="sub-title">
+    Sell Orders
+</div>
+<div class="selector">
+    % for order in sorted(commodity.parent.sell_orders(commodity.id_), key=lambda o: o.price):
+        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported }}<br>
+    % end
+</div>
 
 % include("site/footer.html")

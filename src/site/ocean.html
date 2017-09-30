@@ -2,12 +2,39 @@
 
 % include("site/header.html")
 
+<div class="title">
+    {{ ocean.name }}
+</div>
+
+
+
+
+<div class="sub-title">
+    Islands
+</div>
 <div class="selector">
     % for island in sorted(ocean.islands.keys()):
-    <div class="logo island">
+    <div class="logo island large">
         <div class="logo-text shadow">
             {{ island }}
-            <a href="/almanac/{{ocean.name}}/{{island}}"><span class="link-fill"></span></a>
+            <a href="/almanac/{{ocean.name}}/island/{{island}}"><span class="link-fill"></span></a>
+        </div>
+    </div>
+    % end
+</div>
+
+
+
+
+<div class="sub-title">
+    Commodities
+</div>
+<div class="selector">
+    % for commodity in sorted(ocean.commodities.keys()):
+    <div class="logo commodity small">
+        <div class="logo-text shadow">
+            {{ commodity }}
+            <a href="/almanac/{{ocean.name}}/commodity/{{commodity}}"><span class="link-fill"></span></a>
         </div>
     </div>
     % end
