@@ -1,5 +1,7 @@
 import datetime
 
+import maya
+
 from Database import Database
 
 
@@ -17,11 +19,12 @@ class Almanac(Database):
         for commodity in commodities:
             commodity_id = self.create_or_get_commodity(commodity)
 
+            now = datetime.datetime.now()
             for order in commodities[commodity]["buy_orders"]:
-                self.add_order(order, commodity_id, island_id, "buy")
+                self.add_order(order, commodity_id, island_id, "buy", now)
 
             for order in commodities[commodity]["sell_orders"]:
-                self.add_order(order, commodity_id, island_id, "sell")
+                self.add_order(order, commodity_id, island_id, "sell", now)
 
         self.conn.commit()
 
@@ -70,7 +73,7 @@ class Almanac(Database):
 
         return id_
 
-    def add_order(self, order, commodity_id, island_id, type_):
+    def add_order(self, order, commodity_id, island_id, type_, time):
         self.conn.execute(
             """INSERT INTO orders
                 (commodity_id, island_id, shop, price, amount, order_type, time_reported)
@@ -82,7 +85,7 @@ class Almanac(Database):
              order["price"],
              order["amount"],
              type_,
-             datetime.datetime.now(),))
+             time,))
 
     @property
     def oceans(self):
@@ -121,13 +124,14 @@ class Ocean(Database):
                 "(SELECT rowid FROM islands WHERE ocean_id=?))", (self.id_,))
         }
 
-    def buy_orders(self, commodity_id, all_orders=False):
+
+    def orders(self, commodity_id, type_, all_orders):
         orders = [
             Order.from_db(row) for row in
             self.conn.execute(
                 ("SELECT * FROM orders o "
-                 "WHERE cast(commodity_id as text) like ? AND order_type='buy'"),
-                (commodity_id,))]
+                 "WHERE cast(commodity_id as text) like ? AND order_type like ?"),
+                (commodity_id, type_,))]
 
         if all_orders:
             return orders
@@ -135,18 +139,13 @@ class Ocean(Database):
             newest = max(orders, key=lambda o: o.time_reported)
             return [order for order in orders if order.time_reported == newest.time_reported]
 
-    def sell_orders(self, commodity_id, all_orders=False):
-        orders = [
-            Order.from_db(row) for row in
-            self.conn.execute(
-                ("SELECT * FROM orders o "
-                 "WHERE cast(commodity_id as text) like ? AND order_type='sell'"),
-                (commodity_id,))]
-        if all_orders:
-            return orders
-        else:
-            newest = max(orders, key=lambda o: o.time_reported)
-            return [order for order in orders if order.time_reported == newest.time_reported]
+
+    def buy_orders(self, commodity_id="%", all_orders=False):
+        return self.orders(commodity_id, "buy", all_orders)
+
+
+    def sell_orders(self, commodity_id="%", all_orders=False):
+        return self.orders(commodity_id, "sell", all_orders)
 
 
 
@@ -178,33 +177,26 @@ class Island(Database):
         cur = self.conn.execute("SELECT rowid, * from oceans WHERE rowid=?", (self.ocean_id,))
         return Ocean.from_db(cur.fetchone())
 
-    def buy_orders(self, commodity_id, all_orders=False):
+    def orders(self, commodity_id, type_, all_orders):
         orders = [
             Order.from_db(row) for row in
             self.conn.execute(
                 ("SELECT * FROM orders o "
-                 "WHERE cast(commodity_id as text) like ? AND order_type='buy' "
+                 "WHERE cast(commodity_id as text) like ? AND order_type like ? "
                  "AND island_id = ?"),
-                (commodity_id, self.id_,))]
+                (commodity_id, type_, self.id_,))]
         if all_orders:
             return orders
         else:
             newest = max(orders, key=lambda o: o.time_reported)
             return [order for order in orders if order.time_reported == newest.time_reported]
 
-    def sell_orders(self, commodity_id, all_orders=False):
-        orders = [
-            Order.from_db(row) for row in
-            self.conn.execute(
-                ("SELECT * FROM orders o "
-                 "WHERE cast(commodity_id as text) like ? AND order_type='sell'"
-                 "AND island_id = ?"),
-                (commodity_id, self.id_,))]
-        if all_orders:
-            return orders
-        else:
-            newest = max(orders, key=lambda o: o.time_reported)
-            return [order for order in orders if order.time_reported == newest.time_reported]
+
+    def buy_orders(self, commodity_id="%", all_orders=False):
+        return self.orders(commodity_id, "buy", all_orders)
+
+    def sell_orders(self, commodity_id="%", all_orders=False):
+        return self.orders(commodity_id, "sell", all_orders)
 
 
 
@@ -231,9 +223,23 @@ class Order(Database):
         self.price = price
         self.amount = amount
         self.order_type = order_type
-        self.time_reported = time_reported
+        self.time_reported = maya.parse(time_reported)
         self.island_id = island_id
         self.commodity_id = commodity_id
+
+    @property
+    def island_name(self):
+        cur = self.conn.execute(
+            "SELECT name FROM islands WHERE rowid=?", (self.island_id)
+            )
+        return cur.fetchone()["name"]
+
+    @property
+    def commodity_name(self):
+        cur = self.conn.execute(
+            "SELECT name FROM commodities WHERE rowid=?", (self.commodity_id)
+            )
+        return cur.fetchone()["name"]
 
     @classmethod
     def from_db(cls, db_row):

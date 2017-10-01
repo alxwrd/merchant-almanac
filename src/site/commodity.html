@@ -11,7 +11,7 @@
 </div>
 <div class="selector">
     % for order in sorted(commodity.parent.buy_orders(commodity.id_), key=lambda o: o.price, reverse=True):
-        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported }}<br>
+        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported.slang_time() }}<br>
     % end
 </div>
 
@@ -21,7 +21,7 @@
 </div>
 <div class="selector">
     % for order in sorted(commodity.parent.sell_orders(commodity.id_), key=lambda o: o.price):
-        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported }}<br>
+        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported.slang_time() }}<br>
     % end
 </div>
 
