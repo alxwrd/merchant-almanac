@@ -44,8 +44,6 @@ class Database(object):
             },
         ]
 
-        self.validate_database()
-
 
     def validate_database(self):
         """Checks the defined database schema against the current

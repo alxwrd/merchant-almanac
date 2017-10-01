@@ -9,6 +9,7 @@ class Almanac(Database):
 
     def __init__(self):
         super().__init__()
+        self.validate_database()
 
     def update(self, marketdata):
         ocean_id = self.create_or_get_ocean(marketdata["ocean"])
@@ -148,6 +149,18 @@ class Ocean(Database):
         return self.orders(commodity_id, "sell", all_orders)
 
 
+    @property
+    def routes(self):
+        return []
+        orders = {
+            order.commodity_name: [
+                order
+            ]
+            for order in self.orders("%", "%", False)
+        }
+        return orders
+
+
 
 class Island(Database):
 
@@ -157,9 +170,11 @@ class Island(Database):
         self.name = name
         self.ocean_id = ocean_id
 
+
     @classmethod
     def from_db(cls, db_row):
         return cls(db_row["rowid"], db_row["name"], db_row["ocean_id"])
+
 
     @property
     def commodities(self):
@@ -177,6 +192,7 @@ class Island(Database):
         cur = self.conn.execute("SELECT rowid, * from oceans WHERE rowid=?", (self.ocean_id,))
         return Ocean.from_db(cur.fetchone())
 
+
     def orders(self, commodity_id, type_, all_orders):
         orders = [
             Order.from_db(row) for row in
@@ -188,16 +204,55 @@ class Island(Database):
         if all_orders:
             return orders
         else:
-            newest = max(orders, key=lambda o: o.time_reported)
+            try:
+                newest = max(orders, key=lambda o: o.time_reported)
+            except ValueError: #orders is empty
+                return []
             return [order for order in orders if order.time_reported == newest.time_reported]
 
 
     def buy_orders(self, commodity_id="%", all_orders=False):
         return self.orders(commodity_id, "buy", all_orders)
 
+
     def sell_orders(self, commodity_id="%", all_orders=False):
         return self.orders(commodity_id, "sell", all_orders)
 
+
+    @property
+    def routes(self):
+        islands = self.parent.islands
+        for island in islands:
+            commodities = islands[island].commodities
+            for commodity in commodities:
+                try:
+                    for buy in sorted(self.sell_orders(commodities[commodity].id_), key=lambda b: b.price):
+                        for sell in sorted(islands[island].buy_orders(commodities[commodity].id_), key=lambda s: s.price, reverse=True):
+                            if buy.price < sell.price:
+                                yield Route(
+                                    self,
+                                    islands[island],
+                                    commodities[commodity],
+                                    buy,
+                                    sell)
+                            else:
+                                raise Exception
+                except:
+                    continue
+
+
+class Route(object):
+
+    def __init__(self, start_island, end_island, commodity, buy_order, sell_order):
+        self.start_island = start_island
+        self.end_island = end_island
+        self.commodity = commodity
+        self.buy_order = buy_order
+        self.sell_order = sell_order
+
+    @property
+    def difference(self):
+        return self.sell_order.price - self.buy_order.price
 
 
 class Commodity(Database):
@@ -230,14 +285,14 @@ class Order(Database):
     @property
     def island_name(self):
         cur = self.conn.execute(
-            "SELECT name FROM islands WHERE rowid=?", (self.island_id)
+            "SELECT name FROM islands WHERE rowid=?", (self.island_id,)
             )
         return cur.fetchone()["name"]
 
     @property
     def commodity_name(self):
         cur = self.conn.execute(
-            "SELECT name FROM commodities WHERE rowid=?", (self.commodity_id)
+            "SELECT name FROM commodities WHERE rowid=?", (self.commodity_id,)
             )
         return cur.fetchone()["name"]
 
@@ -251,3 +306,9 @@ class Order(Database):
     def parent(self):
         cur = self.conn.execute("SELECT rowid, * from islands WHERE rowid=?", (self.island_id,))
         return Commodity.from_db(cur.fetchone())
+
+
+if __name__ == "__main__":
+    al = Almanac()
+    for route in al.oceans["Obsidian"].islands["Port Venture"].routes:
+        print(route)

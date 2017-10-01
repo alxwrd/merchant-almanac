@@ -8,6 +8,16 @@
 
 
 <div class="sub-title">
+    Routes
+</div>
+<div class="selector">
+    % for route in sorted(island.routes, key=lambda r: r.difference, reverse=True):
+        {{ route.start_island.name }}, {{ route.end_island.name }}, {{ route.buy_order.commodity_name }}, {{ route.difference }}<br>
+    % end
+</div>
+
+
+<div class="sub-title">
     Commodities
 </div>
 <div class="selector">
