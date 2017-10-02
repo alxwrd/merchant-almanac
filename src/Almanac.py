@@ -194,21 +194,12 @@ class Island(Database):
 
 
     def orders(self, commodity_id, type_, all_orders):
-        orders = [
-            Order.from_db(row) for row in
-            self.conn.execute(
+        for row in self.conn.execute(
                 ("SELECT * FROM orders o "
                  "WHERE cast(commodity_id as text) like ? AND order_type like ? "
                  "AND island_id = ?"),
-                (commodity_id, type_, self.id_,))]
-        if all_orders:
-            return orders
-        else:
-            try:
-                newest = max(orders, key=lambda o: o.time_reported)
-            except ValueError: #orders is empty
-                return []
-            return [order for order in orders if order.time_reported == newest.time_reported]
+                (commodity_id, type_, self.id_,)):
+            yield Order.from_db(row)
 
 
     def buy_orders(self, commodity_id="%", all_orders=False):
@@ -225,19 +216,20 @@ class Island(Database):
         for island in islands:
             commodities = islands[island].commodities
             for commodity in commodities:
+                buy_orders = sorted(self.sell_orders(commodities[commodity].id_), key=lambda b: b.price)
+                sell_orders = sorted(islands[island].buy_orders(commodities[commodity].id_), key=lambda s: s.price, reverse=True)
                 try:
-                    for buy in sorted(self.sell_orders(commodities[commodity].id_), key=lambda b: b.price):
-                        for sell in sorted(islands[island].buy_orders(commodities[commodity].id_), key=lambda s: s.price, reverse=True):
-                            if buy.price < sell.price:
-                                yield Route(
-                                    self,
-                                    islands[island],
-                                    commodities[commodity],
-                                    buy,
-                                    sell)
-                            else:
-                                raise Exception
-                except:
+                    for orders in zip(buy_orders, sell_orders):
+                        if orders[0].price < orders[1].price:
+                            yield Route(
+                                self,
+                                islands[island],
+                                commodities[commodity],
+                                orders[0],
+                                orders[1])
+                        else:
+                            raise StopIteration
+                except StopIteration:
                     continue
 
 
