@@ -4,10 +4,11 @@ import sqlite3
 class Database(object):
     class DbFile(object):
         name = "merchants-almanac.db"
+        conn = sqlite3.connect(name)
+        conn.row_factory = sqlite3.Row
 
     def __init__(self, **kwargs):
-        self.conn = sqlite3.connect(self.DbFile.name)
-        self.conn.row_factory = sqlite3.Row
+        self.conn = self.DbFile.conn
 
         self.database_schema = [
             {
