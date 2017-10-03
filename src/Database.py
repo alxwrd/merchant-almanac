@@ -20,7 +20,7 @@ class Database(object):
             {
                 "name": "islands",
                 "columns": [
-                    {"name": "ocean_id", "type": "interger", "index": False},
+                    {"name": "ocean_id", "type": "interger", "index": True},
                     {"name": "name", "type": "text", "index": False},
                 ]
             },
@@ -32,14 +32,14 @@ class Database(object):
             },
             {
                 "name": "orders",
-                "columns": [ 
-                    {"name": "commodity_id", "type": "interger", "index": False},
-                    {"name": "island_id", "type": "interger", "index": False},
+                "columns": [
+                    {"name": "commodity_id", "type": "interger", "index": True},
+                    {"name": "island_id", "type": "interger", "index": True},
                     {"name": "shop", "type": "text", "index": False},
                     {"name": "price", "type": "interger", "index": False},
                     {"name": "amount", "type": "interger", "index": False},
-                    {"name": "order_type", "type": "text", "index": False},
-                    {"name": "time_reported", "type": "timestamp", "index": False},
+                    {"name": "order_type", "type": "text", "index": True},
+                    {"name": "time_reported", "type": "timestamp", "index": True, "index_dir": "DESC"},
                 ]
             },
         ]
@@ -64,14 +64,21 @@ class Database(object):
                 self.add_table(table)
 
             requires_index = [column for column in table["columns"]
-                                if column["index"]]
+                              if column["index"]]
+            try:
+                self.delete_index(table)
+            except sqlite3.OperationalError:
+                pass
 
-            current_index = [
-                (col["name"], col["tbl_name"], col["sql"])
-                for col in self.conn.execute(
-                    "SELECT * FROM sqlite_master "
-                    "WHERE type = 'index' "
-                    "AND tbl_name = ?", (table["name"],))]
+            if requires_index:
+                self.add_index(table, requires_index)
+
+            # current_index = [
+            #     (col["name"], col["tbl_name"], col["sql"])
+            #     for col in self.conn.execute(
+            #         "SELECT * FROM sqlite_master "
+            #         "WHERE type = 'index' "
+            #         "AND tbl_name = ?", (table["name"],))]
 
             #Get the column information for the current table
             current_columns = [col for col in self.conn.execute(
@@ -90,8 +97,8 @@ class Database(object):
         self.conn.execute(
             "CREATE TABLE {} ({})".format(
                 table["name"],
-                ", ".join(["{} {}".format(key, value)
-                           for key, value in table["columns"].items()])
+                ", ".join(["{} {}".format(col["name"], col["type"])
+                           for col in table["columns"]])
             )
         )
 
@@ -104,13 +111,17 @@ class Database(object):
     def add_index(self, table, columns):
         self.conn.execute(
             "CREATE INDEX {table}_index ON {table} ({columns});".format(
-                table=table,
-                columns=", ".join([column for column in columns])
-            ))
+                table=table["name"],
+                columns=", ".join([
+                    "{} {}".format(column["name"], column.get("index_dir", ""))
+                    for column in columns
+                    ])
+                )
+            )
 
 
     def delete_index(self, table):
         self.conn.execute(
             "DROP INDEX {table}_index".format(
-                table=table)
+                table=table["name"])
             )
