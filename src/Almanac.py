@@ -193,21 +193,21 @@ class Island(Database):
         return Ocean.from_db(cur.fetchone())
 
 
-    def orders(self, commodity_id, type_, all_orders):
-        for row in self.conn.execute(
+    def orders(self, commodity_id, type_, all_orders, sort):
+        orders = self.conn.execute(
                 ("SELECT * FROM orders o "
-                 "WHERE cast(commodity_id as text) like ? AND order_type like ? "
-                 "AND island_id = ?"),
-                (commodity_id, type_, self.id_,)):
-            yield Order.from_db(row)
+                 "WHERE commodity_id = ? AND order_type like ? "
+                 "AND island_id = ? ORDER BY price " + sort),
+                (commodity_id, type_, self.id_,))
+        return orders
 
 
-    def buy_orders(self, commodity_id="%", all_orders=False):
-        return self.orders(commodity_id, "buy", all_orders)
+    def buy_orders(self, commodity_id="%", all_orders=False, sort="DESC"):
+        return self.orders(commodity_id, "buy", all_orders, sort)
 
 
-    def sell_orders(self, commodity_id="%", all_orders=False):
-        return self.orders(commodity_id, "sell", all_orders)
+    def sell_orders(self, commodity_id="%", all_orders=False, sort="ASC"):
+        return self.orders(commodity_id, "sell", all_orders, sort)
 
 
     @property
@@ -216,17 +216,17 @@ class Island(Database):
         for island in islands:
             commodities = islands[island].commodities
             for commodity in commodities:
-                buy_orders = sorted(self.sell_orders(commodities[commodity].id_), key=lambda b: b.price)
-                sell_orders = sorted(islands[island].buy_orders(commodities[commodity].id_), key=lambda s: s.price, reverse=True)
+                buy_orders = self.sell_orders(commodities[commodity].id_)
+                sell_orders = islands[island].buy_orders(commodities[commodity].id_)
                 try:
                     for orders in zip(buy_orders, sell_orders):
-                        if orders[0].price < orders[1].price:
+                        if orders[0]["price"] < orders[1]["price"]:
                             yield Route(
                                 self,
                                 islands[island],
                                 commodities[commodity],
-                                orders[0],
-                                orders[1])
+                                Order.from_db(orders[0]),
+                                Order.from_db(orders[1]))
                         else:
                             raise StopIteration
                 except StopIteration:
@@ -270,7 +270,7 @@ class Order(Database):
         self.price = price
         self.amount = amount
         self.order_type = order_type
-        self.time_reported = maya.parse(time_reported)
+        self.time_reported = time_reported
         self.island_id = island_id
         self.commodity_id = commodity_id
 
