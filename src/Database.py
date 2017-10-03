@@ -4,7 +4,7 @@ import sqlite3
 class Database(object):
     class DbFile(object):
         name = "merchants-almanac.db"
-        conn = sqlite3.connect(name)
+        conn = sqlite3.connect(name, detect_types=sqlite3.PARSE_DECLTYPES)
         conn.row_factory = sqlite3.Row
 
     def __init__(self, **kwargs):
