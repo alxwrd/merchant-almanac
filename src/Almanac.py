@@ -197,7 +197,7 @@ class Island(Database):
     def orders(self, commodity_id, type_, all_orders, sort):
         orders = self.conn.execute(
             ("SELECT * FROM orders o "
-             "WHERE commodity_id = ? AND order_type like ? "
+             "WHERE commodity_id = ? AND order_type = ? "
              "AND island_id = ? AND "
              "time_reported = (SELECT MAX(time_reported) "
              "FROM orders WHERE o.commodity_id=orders.commodity_id "

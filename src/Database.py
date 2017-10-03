@@ -36,7 +36,7 @@ class Database(object):
                     {"name": "commodity_id", "type": "interger", "index": True},
                     {"name": "island_id", "type": "interger", "index": True},
                     {"name": "shop", "type": "text", "index": False},
-                    {"name": "price", "type": "interger", "index": False},
+                    {"name": "price", "type": "interger", "index": True, "index_dir": "ASC"},
                     {"name": "amount", "type": "interger", "index": False},
                     {"name": "order_type", "type": "text", "index": True},
                     {"name": "time_reported", "type": "timestamp", "index": True, "index_dir": "DESC"},
