@@ -17,10 +17,11 @@ class Almanac(Database):
 
         commodities = marketdata["goods"]
 
+        now = datetime.datetime.now()
+
         for commodity in commodities:
             commodity_id = self.create_or_get_commodity(commodity)
 
-            now = datetime.datetime.now()
             for order in commodities[commodity]["buy_orders"]:
                 self.add_order(order, commodity_id, island_id, "buy", now)
 
@@ -195,10 +196,13 @@ class Island(Database):
 
     def orders(self, commodity_id, type_, all_orders, sort):
         orders = self.conn.execute(
-                ("SELECT * FROM orders o "
-                 "WHERE commodity_id = ? AND order_type like ? "
-                 "AND island_id = ? ORDER BY price " + sort),
-                (commodity_id, type_, self.id_,))
+            ("SELECT * FROM orders o "
+             "WHERE commodity_id = ? AND order_type like ? "
+             "AND island_id = ? AND "
+             "time_reported = (SELECT MAX(time_reported) "
+             "FROM orders WHERE o.commodity_id=orders.commodity_id "
+             "AND o.island_id=orders.island_id) ORDER BY price " + sort),
+            (commodity_id, type_, self.id_,))
         return orders
 
 
