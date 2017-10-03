@@ -13,35 +13,34 @@ class Database(object):
         self.database_schema = [
             {
                 "name": "oceans",
-                "columns": {
-                    "name": "text"
-                }
+                "columns": [
+                    {"name": "name", "type": "text", "index": False},
+                ]
             },
             {
                 "name": "islands",
-                "columns": {
-                    "ocean_id": "interger",
-                    "name": "text"
-                }
+                "columns": [
+                    {"name": "ocean_id", "type": "interger", "index": False},
+                    {"name": "name", "type": "text", "index": False},
+                ]
             },
             {
                 "name": "commodities",
-                "columns": {
-                    "name": "text"
-                }
+                "columns": [
+                    {"name": "name", "type": "text", "index": False},
+                ]
             },
             {
                 "name": "orders",
-                "columns": {
-                    "commodity_id": "interger",
-                    "island_id": "interger",
-                    "shop": "text",
-                    "price": "interger",
-                    "amount": "interger",
-                    "order_type": "text",
-                    "time_reported": "timestamp"
-
-                }
+                "columns": [ 
+                    {"name": "commodity_id", "type": "interger", "index": False},
+                    {"name": "island_id", "type": "interger", "index": False},
+                    {"name": "shop", "type": "text", "index": False},
+                    {"name": "price", "type": "interger", "index": False},
+                    {"name": "amount", "type": "interger", "index": False},
+                    {"name": "order_type", "type": "text", "index": False},
+                    {"name": "time_reported", "type": "timestamp", "index": False},
+                ]
             },
         ]
 
@@ -63,20 +62,27 @@ class Database(object):
             except sqlite3.OperationalError:
                 #If it doesn't, add it
                 self.add_table(table)
-                continue
+
+            requires_index = [column for column in table["columns"]
+                                if column["index"]]
+
+            current_index = [
+                (col["name"], col["tbl_name"], col["sql"])
+                for col in self.conn.execute(
+                    "SELECT * FROM sqlite_master "
+                    "WHERE type = 'index' "
+                    "AND tbl_name = ?", (table["name"],))]
 
             #Get the column information for the current table
-            current_columns = [
-                (col[1], col[2]) #Name, type
-                for col in self.conn.execute(
-                    "PRAGMA table_info({})".format(table["name"]))]
+            current_columns = [col for col in self.conn.execute(
+                "PRAGMA table_info({})".format(table["name"]))]
 
             for column in table["columns"]: #For the columns in the schema
-                if not column in [col[0] for col in current_columns]:
+                if not column["name"] in (col["name"] for col in current_columns):
                     #If it doesn't exist in the database: add it
                     self.add_column(table["name"],
-                                    column,
-                                    table["columns"][column])
+                                    column)
+
         self.conn.commit()
 
 
@@ -90,5 +96,21 @@ class Database(object):
         )
 
 
-    def add_column(self, table, column, type_):
-        self.conn.execute("ALTER TABLE {} ADD {} {}".format(table, column, type_))
+    def add_column(self, table, column):
+        self.conn.execute("ALTER TABLE {} ADD {} {}".format(
+            table, column["name"], column["type"]))
+
+
+    def add_index(self, table, columns):
+        self.conn.execute(
+            "CREATE INDEX {table}_index ON {table} ({columns});".format(
+                table=table,
+                columns=", ".join([column for column in columns])
+            ))
+
+
+    def delete_index(self, table):
+        self.conn.execute(
+            "DROP INDEX {table}_index".format(
+                table=table)
+            )
