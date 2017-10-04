@@ -2,13 +2,16 @@ import sqlite3
 
 
 class Database(object):
-    class DbFile(object):
-        name = "merchants-almanac.db"
-        conn = sqlite3.connect(name, detect_types=sqlite3.PARSE_DECLTYPES)
-        conn.row_factory = sqlite3.Row
+    db_file = "merchants-almanac.db"
+    __conn = None
 
     def __init__(self, **kwargs):
-        self.conn = self.DbFile.conn
+        if not Database.__conn:
+            Database.__conn = sqlite3.connect(
+                Database.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+            Database.__conn.row_factory = sqlite3.Row
+
+        self.conn = self.__conn
 
         self.database_schema = [
             {
