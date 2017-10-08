@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 import maya
 import requests
@@ -241,6 +242,8 @@ class Island(Database):
 
     @property
     def routes(self):
+        routes = defaultdict(list)
+
         islands = self.parent.islands
         for island in islands:
             commodities = islands[island].commodities
@@ -250,16 +253,19 @@ class Island(Database):
                 try:
                     for orders in zip(buy_orders, sell_orders):
                         if orders[0]["price"] < orders[1]["price"]:
-                            yield Route(
-                                self,
-                                islands[island],
-                                commodities[commodity],
-                                Order.from_db(orders[0]),
-                                Order.from_db(orders[1]))
+                            routes[islands[island].name].append(
+                                Route(
+                                    self,
+                                    islands[island],
+                                    commodities[commodity],
+                                    Order.from_db(orders[0]),
+                                    Order.from_db(orders[1]))
+                            )
                         else:
                             raise StopIteration
                 except StopIteration:
                     continue
+        return routes
 
 
 class Route(object):
@@ -336,5 +342,8 @@ class Order(Database):
 
 if __name__ == "__main__":
     al = Almanac()
-    for route in al.oceans["Obsidian"].islands["Port Venture"].routes:
-        print(route)
+    routes = al.oceans["Obsidian"].islands["Port Venture"].routes
+    for route in routes:
+        print("Dock side" if routes[route][0].end_island.name == "Port Venture" else routes[route][0].end_island.name)
+        for trade in routes[route]:
+            print( trade.start_island.name , trade.end_island.name , trade.buy_order.commodity_name , trade.difference)

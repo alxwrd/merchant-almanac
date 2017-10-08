@@ -11,8 +11,12 @@
     Routes
 </div>
 <div class="selector">
-    % for route in sorted(island.routes, key=lambda r: r.difference, reverse=True):
-        {{ route.start_island.name }}, {{ route.end_island.name }}, {{ route.buy_order.commodity_name }}, {{ route.difference }}<br>
+    % routes = island.routes
+    % for route in routes:
+        <div class="sub-title">{{ "Dock side" if routes[route][0].end_island.name == island.name else routes[route][0].end_island.name }}</div>
+        % for trade in sorted(routes[route], key=lambda r: r.difference, reverse=True):
+            {{ trade.start_island.name }}, {{ trade.end_island.name }}, {{ trade.buy_order.commodity_name }}, {{ trade.difference }}<br>
+        % end
     % end
 </div>
 
