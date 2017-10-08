@@ -1,6 +1,9 @@
 import datetime
 
 import maya
+import requests
+from lxml import html
+from fuzzywuzzy import process
 
 from Database import Database
 
@@ -11,9 +14,13 @@ class Almanac(Database):
         super().__init__()
         self.validate_database()
 
+
     def update(self, marketdata):
         ocean_id = self.create_or_get_ocean(marketdata["ocean"])
-        island_id = self.create_or_get_island(marketdata["island"], ocean_id)
+
+        island_name = self.validate_island(marketdata["ocean"], marketdata["island"])
+
+        island_id = self.create_or_get_island(island_name, ocean_id)
 
         commodities = marketdata["goods"]
 
@@ -30,6 +37,17 @@ class Almanac(Database):
 
         self.conn.commit()
 
+
+    def validate_island(self, ocean_name, island_name):
+        page = requests.get("http://{}.puzzlepirates.com/yoweb/"
+                            "island/info.wm?showAll=true".format(ocean_name))
+        tree = html.fromstring(page.content)
+
+        islands = tree.xpath("//font[@size='+1']/text()")
+
+        return process.extract(island_name, islands, limit=1)[0][0]
+
+
     def create_or_get_ocean(self, ocean_name):
         ocean = empty = object()
 
@@ -42,6 +60,7 @@ class Almanac(Database):
             id_ = cur.lastrowid
 
         return id_
+
 
     def create_or_get_island(self, island_name, ocean_id):
         island = empty = object()
@@ -59,6 +78,7 @@ class Almanac(Database):
 
         return id_
 
+
     def create_or_get_commodity(self, commodity_name):
         commodity = empty = object()
 
@@ -75,6 +95,7 @@ class Almanac(Database):
 
         return id_
 
+
     def add_order(self, order, commodity_id, island_id, type_, time):
         self.conn.execute(
             """INSERT INTO orders
@@ -88,6 +109,7 @@ class Almanac(Database):
              order["amount"],
              type_,
              time,))
+
 
     @property
     def oceans(self):
@@ -104,9 +126,11 @@ class Ocean(Database):
         self.id_ = id_
         self.name = name
 
+
     @classmethod
     def from_db(cls, db_row):
         return cls(db_row["rowid"], db_row["name"])
+
 
     @property
     def islands(self):
@@ -115,6 +139,7 @@ class Ocean(Database):
             for row in self.conn.execute(
                 "SELECT rowid, * FROM islands WHERE ocean_id=?", (self.id_,))
         }
+
 
     @property
     def commodities(self):
@@ -259,6 +284,7 @@ class Commodity(Database):
         self.name = name
         self.parent = parent
 
+
     @classmethod
     def from_db(cls, db_row, parent=None):
         return cls(db_row["rowid"], db_row["name"], parent)
@@ -278,12 +304,14 @@ class Order(Database):
         self.island_id = island_id
         self.commodity_id = commodity_id
 
+
     @property
     def island_name(self):
         cur = self.conn.execute(
             "SELECT name FROM islands WHERE rowid=?", (self.island_id,)
             )
         return cur.fetchone()["name"]
+
 
     @property
     def commodity_name(self):
@@ -292,11 +320,13 @@ class Order(Database):
             )
         return cur.fetchone()["name"]
 
+
     @classmethod
     def from_db(cls, db_row):
         return cls(db_row["shop"], db_row["price"], db_row["amount"],
                    db_row["order_type"], db_row["time_reported"],
                    db_row["island_id"], db_row["commodity_id"])
+
 
     @property
     def parent(self):
