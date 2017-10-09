@@ -10,19 +10,42 @@
     Buy Orders
 </div>
 <div class="selector">
-    % for order in sorted(commodity.parent.buy_orders(commodity.id_), key=lambda o: o.price, reverse=True):
-        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported.slang_time() }}<br>
-    % end
+        <table>
+            <tr>
+                <th>Shop</th>
+                <th>Buy price</th>
+                <th>Will buy</th>
+            </tr>
+        % for order in sorted(commodity.parent.buy_orders(commodity.id_), key=lambda o: o["price"], reverse=True):
+            <tr>
+                <td class="large">{{ order["shop"] }}</td>
+                <td class="small">{{ order["price"] }}</td>
+                <td class="small">{{ order["amount"] }}</td>
+            </tr>
+        % end
+        </table>
 </div>
 
 
 <div class="sub-title">
     Sell Orders
 </div>
+
 <div class="selector">
-    % for order in sorted(commodity.parent.sell_orders(commodity.id_), key=lambda o: o.price):
-        {{ order.shop }}, {{ order.price }},  {{ order.amount }}, {{ order.time_reported.slang_time() }}<br>
-    % end
+        <table>
+            <tr>
+                <th>Shop</th>
+                <th>Sell price</th>
+                <th>Will sell</th>
+            </tr>
+        % for order in sorted(commodity.parent.sell_orders(commodity.id_), key=lambda o: o["price"]):
+            <tr>
+                <td class="large">{{ order["shop"] }}</td>
+                <td class="small">{{ order["price"] }}</td>
+                <td class="small">{{ order["amount"] }}</td>
+            </tr>
+        % end
+        </table>
 </div>
 
 % include("site/footer.html")
