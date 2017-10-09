@@ -1,2 +1,6 @@
 bottle==0.12.13
 maya==0.3.2
+requests
+lxml
+fuzzywuzzy
+paste
