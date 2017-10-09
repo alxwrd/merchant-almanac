@@ -8,7 +8,9 @@ class Database(object):
     def __init__(self, **kwargs):
         if not Database.__conn:
             Database.__conn = sqlite3.connect(
-                Database.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+                Database.db_file,
+                detect_types=sqlite3.PARSE_DECLTYPES,
+                check_same_thread=False)
             Database.__conn.row_factory = sqlite3.Row
 
         self.conn = self.__conn
