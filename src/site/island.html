@@ -12,11 +12,30 @@
 </div>
 <div class="selector">
     % routes = island.routes
-    % for route in routes:
-        <div class="sub-title">{{ "Dock side" if routes[route][0].end_island.name == island.name else routes[route][0].end_island.name }}</div>
-        % for trade in sorted(routes[route], key=lambda r: r.difference, reverse=True):
-            {{ trade.start_island.name }}, {{ trade.end_island.name }}, {{ trade.buy_order.commodity_name }}, {{ trade.difference }}<br>
+    % for route in sorted(routes, key=lambda r: routes[r][0].start_island.name == routes[r][0].end_island.name, reverse=True):
+        <div class="sub-title">{{ "Dock side trades" if routes[route][0].end_island.name == island.name else "Sailing to: " + routes[route][0].end_island.name }}</div>
+        <table>
+            <tr>
+                <th>Commodity</th>
+                <th>Total profit</th>
+                <th>Profit per unit</th>
+                <th>Tradeable amount</th>
+                <th>Age</th>
+                <th>Buy from</th>
+                <th>Sell to</th>
+            </tr>
+        % for trade in sorted(routes[route], key=lambda r: r.profit, reverse=True):
+            <tr>
+                <td class="medium">{{ trade.buy_order.commodity_name }}</td>
+                <td class="small">{{ trade.profit }}</td>
+                <td class="small">{{ trade.difference }}</td>
+                <td class="small">{{ trade.amount }}</td>
+                <td class="small">{{ max(trade.buy_order, trade.sell_order, key=lambda x: x.time_reported).time_reported_slang }}</td>
+                <td class="large">{{ trade.buy_order.shop }}</td>
+                <td class="large">{{ trade.sell_order.shop }}</td>
+            </tr>
         % end
+        </table>
     % end
 </div>
 

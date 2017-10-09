@@ -282,6 +282,20 @@ class Route(object):
         return self.sell_order.price - self.buy_order.price
 
 
+    @property
+    def amount(self):
+        if self.buy_order.amount >= self.sell_order.amount:
+            return self.sell_order.amount
+        else:
+            return self.buy_order.amount
+
+
+    @property
+    def profit(self):
+        return self.amount * self.difference
+
+
+
 class Commodity(Database):
 
     def __init__(self, id_, name, parent):
@@ -309,6 +323,12 @@ class Order(Database):
         self.time_reported = time_reported
         self.island_id = island_id
         self.commodity_id = commodity_id
+
+
+    @property
+    def time_reported_slang(self):
+        maya_dt = maya.MayaDT.from_datetime(self.time_reported)
+        return maya_dt.slang_time()
 
 
     @property

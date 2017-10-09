@@ -151,3 +151,27 @@ body {
         2px -1px 0 #17526d,
         -2px -1px 0 #17526d;
 }
+
+table {
+    width: 100%;
+}
+
+tr:nth-child(even) {
+    background: #CCC;
+}
+
+tr:nth-child(odd) {
+    background: #FFF;
+}
+
+td.small {
+    width: 8%;
+}
+
+td.medium {
+    width: 12%;
+}
+
+td.large {
+    width: 20%;
+}
