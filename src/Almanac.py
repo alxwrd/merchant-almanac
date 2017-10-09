@@ -25,7 +25,7 @@ class Almanac(Database):
 
         commodities = marketdata["goods"]
 
-        now = datetime.datetime.now()
+        now = maya.now().datetime()
 
         for commodity in commodities:
             commodity_id = self.create_or_get_commodity(commodity)
