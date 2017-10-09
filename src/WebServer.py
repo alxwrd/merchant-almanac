@@ -64,4 +64,4 @@ class WebServer(bottle.Bottle):
 
 if __name__ == "__main__":
     app = WebServer()
-    bottle.run(app, host="localhost", port=80, server="paste")
+    bottle.run(app, host="localhost", port=80, server="waitress")
