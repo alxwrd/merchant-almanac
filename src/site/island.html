@@ -30,7 +30,7 @@
                 <td class="small">{{ trade.profit }}</td>
                 <td class="small">{{ trade.difference }}</td>
                 <td class="small">{{ trade.amount }}</td>
-                <td class="small">{{ max(trade.buy_order, trade.sell_order, key=lambda x: x.time_reported).time_reported_slang }}</td>
+                <td class="small">{{ min(trade.buy_order, trade.sell_order, key=lambda x: x.time_reported).time_reported_slang }}</td>
                 <td class="large">{{ trade.buy_order.shop }}</td>
                 <td class="large">{{ trade.sell_order.shop }}</td>
             </tr>
