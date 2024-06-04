@@ -1,4 +1,4 @@
-bottle==0.12.13
+bottle==0.12.20
 maya==0.3.2
 requests
 lxml
